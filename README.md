@@ -59,7 +59,7 @@ tiny-bpe-tokenizer/
 │   ├── mlp.py              # SwiGLU feed-forward
 │   ├── block.py            # TransformerBlock (pre-norm)
 │   ├── model.py            # TinyQwen (full model + generate)
-│   ├── tokenizer.py        # CharTokenizer
+│   ├── tokenizer.py        # BPETokenizer (Byte Pair Encoding)
 │   ├── train.py            # training loop
 │   └── generate.py         # inference script
 │
@@ -154,8 +154,9 @@ python3 train.py deepseek3 lora s  # LoRA on deepseek3, letter 's'
 
 The training corpus is **~7 700 cleaned Turkish words** in
 `data/cleaned_words.txt`, sourced from `words.csv` and cleaned with
-`cleaning_the_words.py`. Each model uses a simple character-level tokenizer
-(~30–43 unique characters depending on the vocabulary).
+`cleaning_the_words.py`. Each model uses a **Byte Pair Encoding (BPE)** tokenizer
+trained from scratch with a vocabulary size of 128 tokens, learning frequent
+character combinations (like "er", "in", "li") for more efficient sequences.
 
 ## Requirements
 
