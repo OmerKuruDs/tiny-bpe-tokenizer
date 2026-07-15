@@ -54,8 +54,8 @@ if __name__ == "__main__":
     Config = config_class(model_name)
     Tokenizer = tokenizer_class(model_name)
 
-    # Build the vocabulary from the names file (29 Turkish letters + newline).
-    tokenizer = Tokenizer.from_file(DATA_FILE)
+    # Build the vocabulary from the names file (128 BPE tokens).
+    tokenizer = Tokenizer.from_file(DATA_FILE, vocab_size=128)
     # Encode the whole corpus into one flat tensor of token ids.
     data = torch.tensor(tokenizer.encode(open(DATA_FILE, encoding="utf-8").read()),
                         dtype=torch.long)
@@ -82,6 +82,6 @@ if __name__ == "__main__":
     # Save weights + vocabulary + config so train/generate can rebuild it
     # exactly. The filename encodes the architecture (base_<name>.pt).
     path = base_checkpoint(model_name)
-    torch.save({"model": model.state_dict(), "chars": tokenizer.chars, "cfg": cfg},
+    torch.save({"model": model.state_dict(), "tokenizer": tokenizer.get_state(), "cfg": cfg},
                path)
     print(f"saved {path}")

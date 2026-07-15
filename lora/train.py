@@ -87,7 +87,7 @@ def main():
     Model = model_class(model_name)
     Tokenizer = tokenizer_class(model_name)
     ckpt = torch.load(base_checkpoint(model_name), map_location="cpu", weights_only=False)
-    tokenizer = Tokenizer(ckpt["chars"])
+    tokenizer = Tokenizer.from_state(ckpt["tokenizer"])
     model = Model(ckpt["cfg"]); model.load_state_dict(ckpt["model"]); model.eval()
 
     # `--list` as the method: just show every adaptable Linear and exit. Handy

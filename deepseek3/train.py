@@ -11,7 +11,7 @@ import torch
 from config import ModelConfig
 from model import TinyDeepSeek
 from moe import MoE
-from tokenizer import CharTokenizer
+from tokenizer import BPETokenizer
 
 # ---------------------------------------------------------------------------
 # Hyperparameters
@@ -31,9 +31,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 torch.manual_seed(SEED)
 
 # ---------------------------------------------------------------------------
-# Tokenizer + data
+# Tokenizer (BPE level). See tokenizer.py.
 # ---------------------------------------------------------------------------
-tokenizer = CharTokenizer.from_file(DATA_FILE)
+tokenizer = BPETokenizer.from_file(DATA_FILE, vocab_size=128)
 vocab_size = tokenizer.vocab_size
 
 text = open(DATA_FILE, encoding="utf-8").read()
@@ -98,6 +98,6 @@ print("\nsample names:")
 for name in sample_names(10):
     print("  ", name)
 
-torch.save({"model": model.state_dict(), "chars": tokenizer.chars, "cfg": cfg},
+torch.save({"model": model.state_dict(), "tokenizer": tokenizer.get_state(), "cfg": cfg},
            "tiny_deepseek.pt")
 print("\nsaved checkpoint to tiny_deepseek.pt")

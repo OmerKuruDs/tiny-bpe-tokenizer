@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelConfig:
-    vocab_size: int = 30          # 30 Turkish chars (incl. newline)
+    vocab_size: int = 128         # 128 BPE tokens
     hidden_size: int = 32         # model / embedding dimension
     num_layers: int = 3           # first layer dense, the rest MoE (see below)
     num_heads: int = 4            # attention heads (MLA has no GQA; all heads share the KV latent)

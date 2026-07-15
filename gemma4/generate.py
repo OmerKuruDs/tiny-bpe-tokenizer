@@ -7,14 +7,14 @@ import sys
 import torch
 
 from model import TinyGemma
-from tokenizer import CharTokenizer
+from tokenizer import BPETokenizer
 
 CHECKPOINT = "tiny_gemma.pt"
 
 
 def load():
     ckpt = torch.load(CHECKPOINT, map_location="cpu", weights_only=False)
-    tokenizer = CharTokenizer(ckpt["chars"])
+    tokenizer = BPETokenizer.from_state(ckpt["tokenizer"])
     model = TinyGemma(ckpt["cfg"])
     model.load_state_dict(ckpt["model"])
     model.eval()

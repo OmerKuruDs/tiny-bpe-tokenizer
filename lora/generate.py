@@ -49,7 +49,7 @@ def main():
     Model = model_class(arch)
     Tokenizer = tokenizer_class(arch)
     ckpt = torch.load(base_checkpoint(arch), map_location="cpu", weights_only=False)
-    tokenizer = Tokenizer(ckpt["chars"])
+    tokenizer = Tokenizer.from_state(ckpt["tokenizer"])
     model = Model(ckpt["cfg"]); model.load_state_dict(ckpt["model"]); model.eval()
 
     # Inject the adapter shape onto the base and load its trained numbers.

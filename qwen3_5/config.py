@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelConfig:
-    vocab_size: int = 30          # 30 Turkish chars (incl. newline)
+    vocab_size: int = 128         # 128 BPE tokens
     hidden_size: int = 32         # model / embedding dimension
     num_layers: int = 4           # number of transformer blocks
     num_heads: int = 4            # number of query heads

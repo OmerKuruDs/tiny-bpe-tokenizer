@@ -65,9 +65,9 @@ def config_class(name):
     return getattr(_import_from_arch(name, "config"), "ModelConfig")
 
 
-# The CharTokenizer for architecture `name` (identical across all folders).
+# The BPETokenizer for architecture `name` (identical across all folders).
 def tokenizer_class(name):
-    return getattr(_import_from_arch(name, "tokenizer"), "CharTokenizer")
+    return getattr(_import_from_arch(name, "tokenizer"), "BPETokenizer")
 
 
 # The recommended Linear layer names to adapt for architecture `name`.

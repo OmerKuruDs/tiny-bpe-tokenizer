@@ -1,20 +1,5 @@
-"""A BPE (Byte Pair Encoding) tokenizer for Turkish names.
-
-Unlike a character-level tokenizer, BPE merges frequent pairs of tokens
-to compress the sequence. It learns these merges iteratively from the data.
-The vocabulary size determines how many merges it performs.
-
-Usage:
-    tok = BPETokenizer.from_file("temiz_isimler.txt", vocab_size=128)
-    ids = tok.encode("ali")        # -> [..]
-    tok.decode(ids)                # -> "ali"
-    
-    # Save/load state for checkpoints
-    state = tok.get_state()
-    tok2 = BPETokenizer.from_state(state)
-"""
-
 import collections
+import os
 
 class BPETokenizer:
     def __init__(self, vocab=None, merges=None):
@@ -22,8 +7,8 @@ class BPETokenizer:
         self.inverse_vocab = {v: k for k, v in self.vocab.items()}
         self.merges = merges if merges is not None else {}
         self.vocab_size = len(self.vocab)
-        if "\n" in self.inverse_vocab:
-            self.newline_id = self.inverse_vocab["\n"]
+        if "\\n" in self.inverse_vocab:
+            self.newline_id = self.inverse_vocab["\\n"]
         else:
             self.newline_id = None
         self.eos_id = self.newline_id
@@ -33,8 +18,8 @@ class BPETokenizer:
         with open(path, "r", encoding="utf-8") as f:
             text = f.read()
         
-        if "\n" not in text:
-            text += "\n"
+        if "\\n" not in text:
+            text += "\\n"
             
         # 1. Base vocabulary (unique characters)
         chars = sorted(set(text))
@@ -42,15 +27,13 @@ class BPETokenizer:
         inverse_vocab = {ch: i for i, ch in enumerate(chars)}
         
         # 2. Convert text to list of ids
-        # We don't want to merge across newlines, so we process each word separately.
-        words = text.split("\n")
+        words = text.split("\\n")
         word_ids = [[inverse_vocab[c] for c in word] for word in words if word]
         
         merges = {}
         current_vocab_size = len(vocab)
         
         while current_vocab_size < vocab_size:
-            # Count pairs
             pairs = collections.Counter()
             for w in word_ids:
                 for i in range(len(w) - 1):
@@ -61,12 +44,10 @@ class BPETokenizer:
                 
             best_pair = max(pairs, key=pairs.get)
             
-            # Merge best_pair
             new_id = current_vocab_size
             merges[best_pair] = new_id
             vocab[new_id] = vocab[best_pair[0]] + vocab[best_pair[1]]
             
-            # Update word_ids
             new_word_ids = []
             for w in word_ids:
                 i = 0
@@ -86,10 +67,8 @@ class BPETokenizer:
         return cls(vocab, merges)
         
     def encode(self, s: str) -> list[int]:
-        # Start with character ids
         ids = [self.inverse_vocab.get(c, self.inverse_vocab.get('?', 0)) for c in s]
         
-        # Apply merges in order of rank
         while len(ids) >= 2:
             best_pair = None
             best_rank = float('inf')
@@ -97,7 +76,7 @@ class BPETokenizer:
             for i in range(len(ids) - 1):
                 pair = (ids[i], ids[i+1])
                 if pair in self.merges:
-                    rank = self.merges[pair]
+                    rank = self.merges[pair] 
                     if rank < best_rank:
                         best_rank = rank
                         best_pair = pair
@@ -135,3 +114,22 @@ class BPETokenizer:
             k1, k2 = map(int, k_str.split(","))
             merges[(k1, k2)] = v
         return cls(vocab, merges)
+
+if __name__ == "__main__":
+    with open("dummy.txt", "w") as f:
+        f.write("ali\\nahmet\\nayşe\\nfatma\\nmehmet\\n")
+        
+    tok = BPETokenizer.from_file("dummy.txt", 15)
+    print("Vocab size:", tok.vocab_size)
+    print("New vocab entries:", {k: v for k, v in tok.vocab.items() if k > 11}) # assuming <11 base chars
+    
+    enc = tok.encode("ahmet")
+    print("Encoded 'ahmet':", enc)
+    print("Decoded:", tok.decode(enc))
+    
+    assert tok.decode(enc) == "ahmet"
+    state = tok.get_state()
+    tok2 = BPETokenizer.from_state(state)
+    assert tok2.encode("ahmet") == enc
+    print("All tests passed.")
+    os.remove("dummy.txt")
