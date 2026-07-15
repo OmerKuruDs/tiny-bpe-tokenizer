@@ -15,6 +15,7 @@ trains it and saves it, so the same script works for every model.
 """
 
 # os/sys for the CLI arg and paths; torch for the training loop.
+import configparser
 import os
 import sys
 import torch
@@ -24,8 +25,11 @@ import torch
 from base_model import (model_class, config_class, tokenizer_class,
                         base_checkpoint)
 
-# The shared names dataset lives one level up in ../data/.
-DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "temiz_isimler.txt")
+# The shared names dataset path is read from the project-wide config.ini.
+_project_root = os.path.join(os.path.dirname(__file__), "..")
+_ini = configparser.ConfigParser()
+_ini.read(os.path.join(_project_root, "config.ini"))
+DATA_FILE = os.path.join(_project_root, _ini.get("data", "data_file"))
 # Training hyperparameters (same recipe every architecture uses).
 BATCH_SIZE, BLOCK_SIZE, STEPS, LR = 64, 16, 3000, 3e-3
 # CPU is plenty for these ~20-60k parameter models.
